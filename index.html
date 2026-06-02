@@ -157,7 +157,7 @@
 
     .question-box {
       position: relative;
-      min-height: 220px;
+      min-height: 168px;
       margin-top: 10px;
       padding: 22px;
       border: 1px solid #c9d8ea;
@@ -340,7 +340,7 @@
       }
 
       .question-box {
-        min-height: 210px;
+        min-height: 150px;
         padding: 18px;
       }
     }
@@ -491,124 +491,87 @@
       ]
     };
 
-    const patientProfiles = [
-      "老年患者",
-      "合并糖尿病的患者",
-      "合并慢性肾功能不全的患者",
-      "既往有心脑血管病史的患者",
-      "存在出血风险的患者",
-      "免疫功能低下的患者",
-      "肥胖或代谢异常患者",
-      "用药依从性不佳的患者",
-      "基层首诊患者",
-      "住院后症状仍未缓解的患者",
-      "初始治疗效果不佳的患者",
-      "伴有肝肾功能异常的患者",
-      "高龄且合并多种慢病的患者",
-      "需要长期随访管理的患者"
+    const patientMarkers = [
+      "",
+      "老年",
+      "糖尿病",
+      "肾功能不全",
+      "出血风险",
+      "免疫低下",
+      "基层",
+      "住院",
+      "术前",
+      "术后",
+      "高危",
+      "多病共存",
+      "用药复杂",
+      "肝肾异常"
     ];
 
-    const careContexts = [
-      "初始评估阶段",
-      "一线治疗选择阶段",
-      "治疗反应不佳阶段",
-      "复发或进展阶段",
-      "不良反应风险较高阶段",
-      "合并多种慢病用药场景",
-      "门诊随访管理阶段",
-      "住院治疗决策阶段",
-      "检查结果不典型场景",
-      "患者希望了解不同方案利弊的场景",
-      "指南推荐不一致或证据更新的场景",
-      "MDT 讨论场景",
-      "资源有限或基层转诊场景下",
-      "个体化风险分层阶段"
+    const contextMarkers = [
+      "门诊",
+      "住院",
+      "一线",
+      "复发",
+      "进展",
+      "随访",
+      "基层",
+      "MDT",
+      "术前",
+      "术后",
+      "急诊",
+      "长期",
+      "初诊",
+      "不典型",
+      "高风险",
+      "治疗后"
     ];
 
-    const outcomeFocuses = [
-      "死亡率、住院率和生活质量",
-      "症状缓解、复发率和长期预后",
-      "疗效、安全性和患者依从性",
-      "并发症发生率和再入院风险",
-      "疾病进展、复发风险和随访频率",
-      "获益风险比、证据等级和适用人群",
-      "短期疗效、长期结局和不良事件",
-      "检查准确性、诊断效率和成本效益",
-      "药物相互作用、剂量调整和监测指标",
-      "指南推荐强度和关键研究证据",
-      "患者偏好、共病负担和可及性",
-      "治疗时机、疗程和停药标准"
-    ];
-
-    const decisionFactors = [
-      "年龄、共病和器官功能",
-      "病情严重程度、既往治疗史和用药风险",
-      "影像学、实验室指标和临床表现",
-      "指南推荐、证据等级和真实世界研究",
-      "患者偏好、费用和可及性",
-      "复发风险、并发症风险和随访条件",
-      "禁忌证、不良反应和相互作用",
-      "基层可操作性、转诊标准和监测频率",
-      "病程阶段、风险分层和治疗目标",
-      "个体化获益、潜在风险和替代方案"
-    ];
-
-    const evidenceAngles = [
-      "指南推荐与证据等级",
-      "关键临床研究结论",
-      "适用人群与禁忌证",
-      "获益风险平衡",
-      "用药监测和不良反应",
-      "基层可操作性和转诊节点",
-      "患者沟通要点",
-      "随访指标和复评时机",
-      "治疗升级或降阶策略",
-      "合并症下的个体化处理",
-      "诊断路径和检查选择",
-      "真实世界证据",
-      "费用、可及性和依从性",
-      "高风险人群识别",
-      "疗程、停药和复发预防",
-      "证据不确定时的决策要点"
-    ];
+    const conciseFocuses = {
+      "诊断": ["鉴别", "检查", "影像", "实验室", "转诊", "高危", "初筛", "复评"],
+      "治疗": ["疗效", "安全性", "一线", "升级", "适用人群", "风险", "获益", "方案"],
+      "用药": ["剂量", "禁忌", "监测", "相互作用", "停药", "不良反应", "肝肾功能", "疗程"],
+      "指南": ["推荐", "证据等级", "适应证", "随访", "转诊", "疗程", "风险分层", "更新"],
+      "预后": ["复发", "死亡", "住院", "并发症", "长期结局", "高危", "随访", "生活质量"]
+    };
 
     const questionTypes = ["诊断", "治疗", "用药", "指南", "预后"];
 
     const questionTemplates = {
       "诊断": [
-        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}出现${topic.presentation}，临床需要评估${topic.name}时，如何根据${factor}进行诊断与鉴别，并评估后续决策对${outcome}的影响？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}涉及${topic.name}，需要与${topic.differential}区分时，哪些检查路径更适合，并如何结合${factor}判断${outcome}？`,
-        ({ patient, topic, context, outcome, factor }) => `针对${patient}在${context}与${topic.name}相关的临床表现，哪些诊断工具或检查策略在${outcome}方面更有证据支持，且需要考虑${factor}？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，${topic.name}的诊断流程中如何结合${factor}判断是否需要进一步检查或专科转诊，并兼顾${outcome}？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，如果需要评估${topic.name}，有哪些指南推荐的初始评估步骤、排除诊断和基于${factor}的${outcome}判断？`
+        ({ marker, topic, focus }) => `${marker}${topic.name}${focus}怎么查？`,
+        ({ topic, context }) => `${context}${topic.name}如何鉴别？`,
+        ({ marker, topic }) => `${marker}${topic.name}需排除什么？`,
+        ({ topic, focus }) => `${topic.name}${focus}证据是什么？`,
+        ({ marker, topic, context }) => `${marker}${context}${topic.name}何时转诊？`
       ],
       "治疗": [
-        ({ patient, topic, context, outcome, factor }) => `对于${patient}的${topic.name}，在${context}，如何结合${factor}比较${topic.treatments}在${outcome}方面的获益和风险？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}需要处理${topic.name}时，哪些治疗策略在改善${outcome}方面有较强循证依据，并应如何纳入${factor}？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，${topic.name}治疗决策中如何根据${factor}选择初始方案、升级方案或转诊时机，以改善${outcome}？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}处理${topic.name}，指南推荐的治疗路径、关键研究证据和${factor}相关注意事项是什么，对${outcome}有何影响？`,
-        ({ patient, topic, context, outcome, factor }) => `围绕${patient}在${context}的${topic.name}，不同治疗方案对${outcome}的影响有哪些证据差异，如何结合${factor}取舍？`
+        ({ marker, topic }) => `${marker}${topic.name}治疗怎么选？`,
+        ({ topic, context }) => `${context}${topic.name}何时升级治疗？`,
+        ({ topic, focus }) => `${topic.name}${focus}证据如何？`,
+        ({ marker, topic }) => `${marker}${topic.name}一线方案？`,
+        ({ topic, context }) => `${context}${topic.name}治疗风险？`
       ],
       "用药": [
-        ({ patient, topic, context, outcome, factor }) => `对于${patient}在${context}管理${topic.name}，选择${topic.meds}时，如何结合${factor}做个体化用药决策并兼顾${outcome}？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}需要治疗${topic.name}时，哪些药物方案在${outcome}方面更有证据支持，且如何处理${factor}？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}处理${topic.name}时，${topic.meds}的剂量调整、监测指标和不良反应管理应如何安排，以优化${outcome}并结合${factor}？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}使用${topic.meds}治疗${topic.name}时，常见禁忌证、相互作用和停药标准有哪些，对${outcome}有何影响，且需要如何考虑${factor}？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，${topic.name}用药选择中如何基于${factor}比较一线药物和替代药物，并评估${outcome}？`
+        ({ marker, topic }) => `${marker}${topic.name}用药怎么选？`,
+        ({ topic, context }) => `${context}${topic.name}如何调整用药？`,
+        ({ topic, focus }) => `${topic.name}${focus}用药证据？`,
+        ({ marker, topic }) => `${marker}${topic.name}用药禁忌？`,
+        ({ topic }) => `${topic.name}常用药如何监测？`
       ],
       "指南": [
-        ({ patient, topic, context, outcome, factor }) => `关于${patient}在${context}处理${topic.name}，最新指南对${topic.guideline}有哪些推荐，如何结合${factor}评估${outcome}？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，${topic.name}相关指南中哪些推荐与${outcome}关系最密切，证据等级如何，是否受${factor}影响？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}的${topic.name}处理中，指南如何建议在${context}结合${factor}进行风险分层和治疗选择，并改善${outcome}？`,
-        ({ patient, topic, context, outcome, factor }) => `不同指南对${patient}在${context}处理${topic.name}的${topic.guideline}是否存在差异，关键证据、${factor}和${outcome}如何比较？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，请整理${topic.name}的指南推荐、证据等级、${factor}相关临床注意事项，以及与${outcome}相关的依据。`
+        ({ topic }) => `${topic.name}最新指南怎么说？`,
+        ({ marker, topic }) => `${marker}${topic.name}指南推荐？`,
+        ({ topic, context, focus }) => `${context}${topic.name}${focus}建议？`,
+        ({ topic }) => `${topic.name}证据等级如何？`,
+        ({ topic }) => `${topic.name}何时转诊？`
       ],
       "预后": [
-        ({ patient, topic, context, outcome, factor }) => `对于${patient}在${context}处理${topic.name}，哪些因素会影响${topic.risk}，并如何进一步评估${outcome}？目前有哪些风险评估工具或证据支持？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，${topic.name}患者如何根据${factor}评估${outcome}，并制定随访策略？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}涉及${topic.name}，哪些临床指标能结合${factor}预测预后、治疗反应和${outcome}？`,
-        ({ patient, topic, context, outcome, factor }) => `围绕${patient}在${context}的${topic.name}，哪些干预措施可能改善${outcome}，证据质量如何，是否需要依据${factor}分层？`,
-        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}处理${topic.name}时，如何结合${factor}判断复发、并发症或进展风险，并预测${outcome}？`
+        ({ marker, topic }) => `${marker}${topic.name}预后如何评估？`,
+        ({ topic, focus }) => `${topic.name}${focus}风险多高？`,
+        ({ topic, context }) => `${context}${topic.name}随访重点？`,
+        ({ topic }) => `${topic.name}哪些指标提示高危？`,
+        ({ marker, topic }) => `${marker}${topic.name}复发如何预防？`
       ]
     };
 
@@ -621,7 +584,8 @@
     const copyBtn = document.querySelector("#copyBtn");
     const copyState = document.querySelector("#copyState");
 
-    const storageKey = "deepevidence-used-question-keys-v2";
+    const maxQuestionLength = 40;
+    const storageKey = "deepevidence-used-question-keys-v3";
     const usedQuestionKeys = loadUsedQuestionKeys();
 
     let currentQuestion;
@@ -688,26 +652,26 @@
         : { value: scenarioSelect.value, index: questionTypes.indexOf(scenarioSelect.value) };
       const type = typePick.value;
       const templatePick = pick(questionTemplates[type]);
-      const patientPick = pick(patientProfiles);
-      const contextPick = pick(careContexts);
-      const outcomePick = pick(outcomeFocuses);
-      const factorPick = pick(decisionFactors);
-      const anglePick = pick(evidenceAngles);
-      const baseText = templatePick.value({
-        patient: patientPick.value,
+      const markerPick = pick(patientMarkers);
+      const contextPick = pick(contextMarkers);
+      const focusPick = pick(conciseFocuses[type]);
+      const text = templatePick.value({
+        marker: markerPick.value,
         topic: topicPick.value,
         context: contextPick.value,
-        outcome: outcomePick.value,
-        factor: factorPick.value
+        focus: focusPick.value
       });
-      const text = `${baseText} 请重点关注${anglePick.value}。`;
 
       return { key: hashText(text), department, type, text };
     }
 
     function generateQuestion() {
       let question = buildQuestion();
-      for (let attempts = 0; attempts < 120 && (usedQuestionKeys.has(question.key) || question.key === lastQuestionKey); attempts += 1) {
+      for (
+        let attempts = 0;
+        attempts < 200 && (question.text.length > maxQuestionLength || usedQuestionKeys.has(question.key) || question.key === lastQuestionKey);
+        attempts += 1
+      ) {
         question = buildQuestion();
       }
       lastQuestionKey = question.key;
