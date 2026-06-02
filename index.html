@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DeepEvidence 临床问题体验</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --blue-900: #102a6b;
+      --blue-800: #1742a0;
+      --blue-600: #2563eb;
+      --cyan-500: #18b6d9;
+      --ink: #122033;
+      --muted: #66758f;
+      --line: #d9e2f0;
+      --soft: #f4f8fc;
+      --green: #15a36d;
+      --white: #ffffff;
+      --shadow: 0 18px 50px rgba(23, 66, 160, .16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 14% 12%, rgba(24, 182, 217, .22), transparent 27%),
+        linear-gradient(135deg, #eef6ff 0%, #f9fbfd 46%, #eaf8fb 100%);
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 42px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 46px;
+      height: 46px;
+      place-items: center;
+      border-radius: 12px;
+      color: var(--white);
+      background: linear-gradient(135deg, var(--blue-800), var(--cyan-500));
+      font-weight: 800;
+      letter-spacing: 0;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, .24);
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.1;
+    }
+
+    .brand span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid rgba(37, 99, 235, .18);
+      border-radius: 999px;
+      color: var(--blue-800);
+      background: rgba(255, 255, 255, .7);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(300px, .88fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .generator,
+    .qr-panel {
+      border: 1px solid rgba(217, 226, 240, .86);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .94);
+      box-shadow: var(--shadow);
+    }
+
+    .generator {
+      padding: 26px;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 740px;
+      color: var(--blue-900);
+      font-size: clamp(31px, 5vw, 54px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 24px 0 16px;
+    }
+
+    label {
+      display: block;
+      margin: 0 0 8px;
+      color: #31405a;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    select {
+      width: 100%;
+      height: 44px;
+      padding: 0 38px 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--white);
+      font-size: 15px;
+      outline: none;
+    }
+
+    select:focus,
+    button:focus-visible {
+      outline: 3px solid rgba(24, 182, 217, .28);
+      outline-offset: 2px;
+    }
+
+    .question-box {
+      position: relative;
+      min-height: 220px;
+      margin-top: 10px;
+      padding: 22px;
+      border: 1px solid #c9d8ea;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+
+    .question-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 9px;
+      border-radius: 999px;
+      color: #24507d;
+      background: #e9f5fb;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    #questionText {
+      margin: 0;
+      font-size: 23px;
+      line-height: 1.72;
+      font-weight: 750;
+      color: #14243a;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 46px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 750;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .primary {
+      color: var(--white);
+      background: linear-gradient(135deg, var(--blue-800), var(--blue-600));
+      box-shadow: 0 10px 20px rgba(37, 99, 235, .23);
+    }
+
+    .secondary {
+      color: var(--blue-800);
+      border: 1px solid rgba(37, 99, 235, .18);
+      background: #eef6ff;
+    }
+
+    .copy-state {
+      display: inline-flex;
+      align-items: center;
+      min-height: 46px;
+      color: var(--green);
+      font-size: 14px;
+      font-weight: 750;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .copy-state.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .qr-panel {
+      overflow: hidden;
+    }
+
+    .qr-head {
+      padding: 24px 24px 0;
+    }
+
+    .qr-head h2 {
+      margin: 0;
+      color: var(--blue-900);
+      font-size: 24px;
+      line-height: 1.25;
+    }
+
+    .qr-head p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .qr-frame {
+      margin: 20px 24px 24px;
+      padding: 14px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #184db7, #2b7af7);
+    }
+
+    .qr-frame img {
+      display: block;
+      width: 100%;
+      border-radius: 6px;
+    }
+
+    .steps {
+      display: grid;
+      gap: 10px;
+      padding: 0 24px 24px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      align-items: start;
+      color: #41516c;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .step b {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--white);
+      background: var(--blue-600);
+      font-size: 13px;
+    }
+
+    @media (max-width: 860px) {
+      .page {
+        width: min(100% - 22px, 680px);
+        padding-top: 18px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .badge {
+        display: none;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .generator {
+        padding: 20px;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      #questionText {
+        font-size: 20px;
+      }
+
+      .question-box {
+        min-height: 210px;
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand" aria-label="DeepEvidence">
+        <div class="brand-mark">DE</div>
+        <div>
+          <strong>DeepEvidence</strong>
+          <span>AI 循证医学检索系统</span>
+        </div>
+      </div>
+      <div class="badge">临床问题一键生成 · 复制后扫码体验</div>
+    </header>
+
+    <section class="layout">
+      <div class="generator">
+        <h1>不知道问什么？先从一个临床问题开始</h1>
+
+        <div class="controls" aria-label="问题筛选">
+          <div>
+            <label for="department">临床方向</label>
+            <select id="department">
+              <option value="all">全部方向</option>
+              <option value="心血管">心血管</option>
+              <option value="肿瘤">肿瘤</option>
+              <option value="呼吸">呼吸</option>
+              <option value="内分泌">内分泌</option>
+              <option value="感染">感染</option>
+              <option value="消化">消化</option>
+              <option value="神经">神经</option>
+              <option value="围术期">围术期</option>
+            </select>
+          </div>
+          <div>
+            <label for="scenario">问题类型</label>
+            <select id="scenario">
+              <option value="all">全部类型</option>
+              <option value="诊断">诊断与鉴别</option>
+              <option value="治疗">治疗方案</option>
+              <option value="用药">用药选择</option>
+              <option value="指南">指南证据</option>
+              <option value="预后">预后评估</option>
+            </select>
+          </div>
+        </div>
+
+        <article class="question-box" aria-live="polite">
+          <div class="question-meta">
+            <span class="tag" id="deptTag">心血管</span>
+            <span class="tag" id="typeTag">治疗方案</span>
+          </div>
+          <p id="questionText"></p>
+        </article>
+
+        <div class="actions">
+          <button class="primary" id="generateBtn" type="button" aria-label="生成新的临床问题">换一个问题</button>
+          <button class="secondary" id="copyBtn" type="button" aria-label="复制当前临床问题">复制问题</button>
+          <span class="copy-state" id="copyState">已复制，可以扫码体验了</span>
+        </div>
+      </div>
+
+      <aside class="qr-panel" aria-label="扫码进入 DeepEvidence">
+        <div class="qr-head">
+          <h2>复制问题后，扫码进入产品</h2>
+          <p>进入 DeepEvidence 后，将刚才复制的临床问题粘贴到提问框，即可开始体验。</p>
+        </div>
+        <div class="qr-frame">
+          <img src="assets/deepevidence-qr-crop.jpg" alt="DeepEvidence 体验二维码">
+        </div>
+        <div class="steps">
+          <div class="step"><b>1</b><span>点击“换一个问题”，找到适合自己的临床场景。</span></div>
+          <div class="step"><b>2</b><span>点击“复制问题”，把完整问题复制到剪贴板。</span></div>
+          <div class="step"><b>3</b><span>扫描二维码进入 DeepEvidence，粘贴问题并提交。</span></div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const departments = {
+      "心血管": [
+        { name: "慢性心力衰竭", presentation: "活动后气促和下肢水肿", differential: "心衰加重、COPD、贫血和肾功能恶化", treatments: "ARNI、β受体阻滞剂、MRA 和 SGLT2 抑制剂", meds: "利尿剂、ARNI、SGLT2 抑制剂和 MRA", guideline: "射血分数分型、四联药物和随访监测", risk: "心衰再住院和全因死亡" },
+        { name: "心房颤动", presentation: "心悸、乏力或偶发胸闷", differential: "阵发性室上速、甲亢相关心律失常和结构性心脏病", treatments: "节律控制、室率控制和导管消融", meds: "DOAC、华法林、β受体阻滞剂和抗心律失常药", guideline: "卒中风险评估、抗凝选择和消融适应证", risk: "卒中、出血和复发" },
+        { name: "急性冠脉综合征", presentation: "胸痛伴心电图或肌钙蛋白异常", differential: "主动脉夹层、肺栓塞、心肌炎和稳定型心绞痛", treatments: "早期侵入策略、保守治疗和二级预防", meds: "阿司匹林、P2Y12 抑制剂、他汀和抗凝药", guideline: "PCI 时机、抗血小板疗程和危险分层", risk: "再发心梗、出血和死亡" },
+        { name: "高血压合并慢病", presentation: "血压长期控制不佳或靶器官损害", differential: "原发性高血压、继发性高血压和白大衣高血压", treatments: "生活方式干预、联合降压和靶器官保护", meds: "ACEI/ARB、CCB、利尿剂和β受体阻滞剂", guideline: "目标血压、联合用药和家庭血压监测", risk: "脑卒中、心衰和肾功能进展" },
+        { name: "动脉粥样硬化性心血管病", presentation: "血脂异常或既往血管事件", differential: "家族性高胆固醇血症、继发性血脂异常和代谢综合征", treatments: "强化降脂、生活方式干预和危险因素控制", meds: "他汀、依折麦布和 PCSK9 抑制剂", guideline: "LDL-C 目标值、强化治疗和随访复查", risk: "主要心血管事件和复发风险" },
+        { name: "肺栓塞", presentation: "突发呼吸困难、胸痛或低氧血症", differential: "急性冠脉综合征、气胸、肺炎和心衰", treatments: "抗凝治疗、溶栓治疗和介入取栓", meds: "低分子肝素、DOAC、华法林和溶栓药物", guideline: "危险分层、抗凝时长和复发预防", risk: "血流动力学恶化、复发和出血" }
+      ],
+      "肿瘤": [
+        { name: "晚期非小细胞肺癌", presentation: "肺部占位伴分子检测或 PD-L1 结果", differential: "小细胞肺癌、肺转移瘤和感染性结节", treatments: "靶向治疗、免疫治疗和含铂化疗", meds: "EGFR/ALK 靶向药、PD-1/PD-L1 抑制剂和化疗药物", guideline: "分子分型、一线方案和耐药后处理", risk: "无进展生存、总生存和免疫相关不良反应" },
+        { name: "HER2 阳性乳腺癌", presentation: "乳腺肿块伴 HER2 阳性病理结果", differential: "三阴性乳腺癌、激素受体阳性乳腺癌和良性乳腺病变", treatments: "新辅助治疗、抗 HER2 治疗和术后强化治疗", meds: "曲妥珠单抗、帕妥珠单抗、T-DM1 和内分泌治疗", guideline: "新辅助适应证、残余病灶处理和随访", risk: "病理完全缓解、复发和心脏毒性" },
+        { name: "结直肠癌肝转移", presentation: "结直肠癌术后或初诊发现肝脏转移灶", differential: "良性肝占位、肝细胞癌和其他来源肝转移", treatments: "转化治疗、手术切除、局部治疗和全身治疗", meds: "含奥沙利铂方案、含伊立替康方案、抗 EGFR 和抗 VEGF 药物", guideline: "可切除性评估、RAS/BRAF 检测和治疗排序", risk: "转化切除率、复发率和总生存" },
+        { name: "肝细胞癌", presentation: "肝硬化背景下肝占位或 AFP 升高", differential: "肝转移瘤、胆管癌和再生结节", treatments: "手术切除、消融、TACE、靶向和免疫治疗", meds: "阿替利珠单抗联合贝伐珠单抗、酪氨酸激酶抑制剂和免疫单药", guideline: "BCLC 分期、肝功能评估和系统治疗选择", risk: "肝功能失代偿、进展和总生存" },
+        { name: "胃癌", presentation: "胃镜病理证实恶性肿瘤", differential: "胃淋巴瘤、胃间质瘤和良性溃疡", treatments: "围手术期化疗、根治手术、免疫治疗和靶向治疗", meds: "含铂化疗、氟尿嘧啶类、HER2 靶向药和 PD-1 抑制剂", guideline: "分期评估、围手术期方案和 HER2/MSI 检测", risk: "复发、营养状态和治疗毒性" },
+        { name: "前列腺癌", presentation: "PSA 升高或影像提示前列腺病灶", differential: "良性前列腺增生、前列腺炎和转移性骨病", treatments: "主动监测、根治治疗、内分泌治疗和新型内分泌治疗", meds: "ADT、阿比特龙、恩扎卢胺和化疗药物", guideline: "危险分层、转移性疾病处理和随访监测", risk: "生化复发、骨相关事件和生活质量" }
+      ],
+      "呼吸": [
+        { name: "慢性阻塞性肺疾病", presentation: "慢性咳嗽、咳痰和活动后气促", differential: "哮喘、支气管扩张和心衰", treatments: "支气管舒张剂、吸入糖皮质激素和肺康复", meds: "LABA、LAMA、ICS 和磷酸二酯酶抑制剂", guideline: "症状分组、急性加重风险和吸入治疗升级", risk: "急性加重、肺功能下降和住院" },
+        { name: "社区获得性肺炎", presentation: "发热、咳嗽和肺部影像浸润", differential: "病毒感染、肺结核、肺栓塞和心衰", treatments: "门诊治疗、住院治疗和重症监护策略", meds: "β内酰胺类、大环内酯类、呼吸喹诺酮和抗病毒药", guideline: "严重程度评分、经验治疗和疗程", risk: "治疗失败、耐药菌感染和死亡" },
+        { name: "支气管哮喘", presentation: "反复喘息、胸闷或夜间咳嗽", differential: "COPD、声带功能障碍和心源性哮喘", treatments: "阶梯治疗、吸入治疗和生物制剂", meds: "ICS、LABA、白三烯受体拮抗剂和抗 IgE/IL-5 药物", guideline: "控制水平评估、升级降级治疗和急性发作处理", risk: "急性发作、肺功能下降和用药依从性" },
+        { name: "间质性肺疾病", presentation: "进行性呼吸困难和弥漫性肺间质改变", differential: "特发性肺纤维化、结缔组织病相关肺病和药物性肺损伤", treatments: "抗纤维化治疗、免疫抑制和氧疗", meds: "吡非尼酮、尼达尼布、糖皮质激素和免疫抑制剂", guideline: "HRCT 分型、病因筛查和抗纤维化适应证", risk: "疾病进展、急性加重和死亡" },
+        { name: "肺结节", presentation: "体检或影像发现肺部小结节", differential: "良性结节、早期肺癌、感染性肉芽肿和转移灶", treatments: "影像随访、穿刺活检、手术切除和消融", meds: "抗感染治疗、围术期用药和靶向治疗评估", guideline: "结节大小、影像特征和随访间隔", risk: "恶性概率、过度检查和延误诊断" },
+        { name: "阻塞性睡眠呼吸暂停", presentation: "打鼾、日间嗜睡和夜间低氧", differential: "单纯鼾症、肥胖低通气综合征和中枢性睡眠呼吸暂停", treatments: "CPAP、减重、口腔矫治器和手术评估", meds: "合并高血压或代谢异常的相关治疗", guideline: "睡眠监测、严重程度分级和治疗依从性管理", risk: "心血管事件、交通风险和生活质量下降" }
+      ],
+      "内分泌": [
+        { name: "2 型糖尿病", presentation: "血糖控制不佳或糖化血红蛋白升高", differential: "1 型糖尿病、LADA 和继发性高血糖", treatments: "生活方式干预、口服降糖药、注射治疗和并发症管理", meds: "二甲双胍、SGLT2 抑制剂、GLP-1 受体激动剂和胰岛素", guideline: "个体化血糖目标、心肾获益药物和低血糖预防", risk: "心血管事件、肾病进展和低血糖" },
+        { name: "甲状腺结节", presentation: "超声提示甲状腺结节或体检发现颈部包块", differential: "良性结节、甲状腺癌、甲状腺炎和囊肿", treatments: "随访、细针穿刺、手术和射频消融", meds: "左甲状腺素、抗甲状腺药和术后替代治疗", guideline: "超声风险分层、FNA 指征和随访频率", risk: "恶性风险、过度治疗和复发" },
+        { name: "骨质疏松", presentation: "低骨量、脆性骨折或跌倒风险升高", differential: "继发性骨质疏松、骨软化症和转移性骨病", treatments: "抗骨吸收治疗、促骨形成治疗和跌倒预防", meds: "双膦酸盐、地舒单抗、特立帕肽和钙剂维生素 D", guideline: "骨折风险分层、初始治疗和疗程管理", risk: "再骨折、下颌骨坏死和非典型股骨骨折" },
+        { name: "甲状腺功能亢进", presentation: "心悸、手抖、体重下降或 TSH 降低", differential: "Graves 病、毒性结节性甲状腺肿和甲状腺炎", treatments: "抗甲状腺药物、放射碘和手术", meds: "甲巯咪唑、丙硫氧嘧啶和β受体阻滞剂", guideline: "病因诊断、疗程选择和复发处理", risk: "甲状腺危象、粒细胞减少和复发" },
+        { name: "糖尿病肾病", presentation: "糖尿病患者出现蛋白尿或 eGFR 下降", differential: "高血压肾损害、原发性肾小球疾病和药物性肾损伤", treatments: "血糖血压控制、肾脏保护和并发症管理", meds: "ACEI/ARB、SGLT2 抑制剂、非甾体盐皮质激素受体拮抗剂和 GLP-1 受体激动剂", guideline: "白蛋白尿分层、肾功能监测和转诊标准", risk: "肾功能进展、心血管事件和高钾血症" },
+        { name: "肥胖症", presentation: "BMI 升高并伴代谢异常或生活质量下降", differential: "单纯性肥胖、库欣综合征和药物相关体重增加", treatments: "生活方式干预、药物减重和代谢手术", meds: "GLP-1 受体激动剂、双重肠促胰素受体激动剂和合并症用药", guideline: "BMI 分层、药物适应证和手术适应证", risk: "体重反弹、心血管代谢风险和不良反应" }
+      ],
+      "感染": [
+        { name: "脓毒症", presentation: "感染伴低血压、乳酸升高或器官功能障碍", differential: "低血容量休克、心源性休克和非感染性炎症反应", treatments: "早期复苏、感染源控制和器官支持", meds: "广谱抗菌药、血管活性药和液体复苏方案", guideline: "早期识别、抗菌药启动和复苏目标", risk: "死亡、器官衰竭和二重感染" },
+        { name: "医院获得性肺炎", presentation: "住院后新发肺部感染表现", differential: "吸入性肺炎、肺水肿、肺栓塞和病毒感染", treatments: "经验性抗感染、病原学检查和降阶梯治疗", meds: "抗假单胞菌β内酰胺、万古霉素、利奈唑胺和碳青霉烯类", guideline: "耐药风险评估、经验覆盖和疗程", risk: "耐药菌感染、治疗失败和肾毒性" },
+        { name: "发热伴中性粒细胞减少", presentation: "肿瘤治疗后发热并中性粒细胞降低", differential: "细菌感染、真菌感染、药物热和肿瘤热", treatments: "风险分层、经验性抗感染和抗真菌治疗", meds: "抗假单胞菌β内酰胺、碳青霉烯、糖肽类和抗真菌药", guideline: "高低危分层、首剂抗菌药和疗程", risk: "感染进展、侵袭性真菌病和死亡" },
+        { name: "复杂性尿路感染", presentation: "发热、尿路刺激症状或腰痛", differential: "肾盂肾炎、前列腺炎、泌尿系结石和非感染性膀胱炎", treatments: "经验性抗感染、引流处理和复发预防", meds: "头孢菌素、喹诺酮、碳青霉烯和磷霉素", guideline: "尿培养、耐药风险和疗程选择", risk: "菌血症、复发和耐药" },
+        { name: "慢性乙型肝炎", presentation: "HBV DNA 升高或肝功能异常", differential: "脂肪性肝病、自身免疫性肝炎和其他病毒性肝炎", treatments: "抗病毒治疗、肝纤维化评估和肝癌筛查", meds: "恩替卡韦、替诺福韦和干扰素", guideline: "治疗启动标准、停药标准和随访监测", risk: "肝硬化、肝癌和病毒反弹" },
+        { name: "念珠菌血症", presentation: "血培养提示念珠菌或高危患者持续发热", differential: "细菌性血流感染、导管相关感染和侵袭性曲霉病", treatments: "抗真菌治疗、拔除导管和眼底筛查", meds: "棘白菌素类、氟康唑和两性霉素 B", guideline: "首选治疗、疗程和感染源控制", risk: "播散感染、复发和死亡" }
+      ],
+      "消化": [
+        { name: "幽门螺杆菌感染", presentation: "消化不良、溃疡病史或检测阳性", differential: "功能性消化不良、胃食管反流和胃癌风险病变", treatments: "一线根除、补救治疗和复查确认", meds: "质子泵抑制剂、铋剂、阿莫西林、克拉霉素和甲硝唑", guideline: "耐药背景、四联方案和复查时机", risk: "根除失败、复发和胃癌风险" },
+        { name: "溃疡性结肠炎", presentation: "反复腹泻、黏液血便和肠镜炎症", differential: "克罗恩病、感染性肠炎和缺血性肠炎", treatments: "5-ASA、糖皮质激素、生物制剂和 JAK 抑制剂", meds: "美沙拉嗪、英夫利昔单抗、维得利珠单抗、乌司奴单抗和托法替布", guideline: "疾病活动度、治疗升级和黏膜愈合目标", risk: "复发、结直肠癌风险和感染" },
+        { name: "肝硬化腹水", presentation: "肝硬化背景下腹胀、腹水或低钠血症", differential: "恶性腹水、心源性腹水和肾病综合征", treatments: "限盐、利尿、腹腔穿刺和 TIPS 评估", meds: "螺内酯、呋塞米、白蛋白和抗菌预防药物", guideline: "腹水分级、SBP 预防和转诊肝移植", risk: "自发性细菌性腹膜炎、肾损伤和死亡" },
+        { name: "胃食管反流病", presentation: "烧心、反酸或胸骨后不适", differential: "功能性烧心、嗜酸性食管炎和冠心病", treatments: "生活方式干预、抑酸治疗和抗反流手术评估", meds: "质子泵抑制剂、H2 受体拮抗剂和促动力药", guideline: "经验治疗、内镜指征和长期用药策略", risk: "复发、食管炎和 Barrett 食管" },
+        { name: "急性胰腺炎", presentation: "急性上腹痛伴淀粉酶或脂肪酶升高", differential: "胆石症、消化性溃疡穿孔和肠梗阻", treatments: "液体复苏、镇痛、营养支持和胆源性处理", meds: "镇痛药、液体复苏方案和必要时抗菌药", guideline: "严重程度评估、影像时机和 ERCP 指征", risk: "器官衰竭、感染性坏死和复发" },
+        { name: "上消化道出血", presentation: "呕血、黑便或血红蛋白下降", differential: "消化性溃疡、静脉曲张破裂和肿瘤出血", treatments: "内镜止血、药物治疗和介入或手术评估", meds: "质子泵抑制剂、生长抑素、抗菌药和止血相关用药", guideline: "危险分层、内镜时机和二级预防", risk: "再出血、休克和死亡" }
+      ],
+      "神经": [
+        { name: "急性缺血性卒中", presentation: "突发偏瘫、言语不清或意识改变", differential: "脑出血、癫痫后麻痹、低血糖和偏头痛先兆", treatments: "静脉溶栓、机械取栓和卒中单元管理", meds: "阿替普酶、替奈普酶、抗血小板药和他汀", guideline: "时间窗、影像筛选和二级预防", risk: "功能预后、出血转化和复发" },
+        { name: "癫痫", presentation: "反复发作性意识障碍、抽搐或感觉异常", differential: "晕厥、心律失常、短暂性脑缺血发作和心理性发作", treatments: "抗癫痫药物、病因治疗和手术评估", meds: "左乙拉西坦、拉莫三嗪、丙戊酸和卡马西平", guideline: "首药选择、疗程和停药评估", risk: "复发、认知影响和药物相互作用" },
+        { name: "偏头痛", presentation: "反复搏动性头痛伴恶心或畏光", differential: "紧张型头痛、丛集性头痛、颅内病变和药物过度使用性头痛", treatments: "急性期治疗、预防治疗和诱因管理", meds: "曲普坦、NSAIDs、β受体阻滞剂、CGRP 单抗和肉毒毒素", guideline: "预防治疗指征、药物选择和疗效评估", risk: "发作频率、药物过度使用和生活质量" },
+        { name: "帕金森病", presentation: "静止性震颤、运动迟缓或肌强直", differential: "特发性震颤、药物性帕金森综合征和多系统萎缩", treatments: "药物治疗、康复训练和脑深部电刺激评估", meds: "左旋多巴、多巴胺受体激动剂、MAO-B 抑制剂和 COMT 抑制剂", guideline: "早期用药、运动并发症处理和非运动症状管理", risk: "跌倒、认知下降和运动波动" },
+        { name: "阿尔茨海默病", presentation: "进行性记忆下降或日常功能受损", differential: "血管性认知障碍、抑郁症、甲状腺功能异常和正常压力脑积水", treatments: "认知药物治疗、照护干预和危险因素管理", meds: "胆碱酯酶抑制剂、美金刚和精神行为症状相关用药", guideline: "诊断流程、量表评估和长期照护", risk: "认知进展、照护负担和安全风险" },
+        { name: "脑出血", presentation: "突发头痛、偏瘫或意识障碍并影像证实出血", differential: "缺血性卒中、动脉瘤破裂和脑肿瘤出血", treatments: "血压管理、凝血逆转、神经重症监护和手术评估", meds: "降压药、止血相关药物和抗凝逆转药", guideline: "血压目标、手术指征和抗栓恢复时机", risk: "血肿扩大、死亡和功能残疾" }
+      ],
+      "围术期": [
+        { name: "围术期抗凝管理", presentation: "长期抗凝患者计划接受择期手术", differential: "高血栓风险、高手术出血风险和药物蓄积风险", treatments: "停药策略、桥接治疗和术后恢复抗凝", meds: "华法林、DOAC、低分子肝素和抗血小板药", guideline: "停药时间、桥接适应证和恢复用药时机", risk: "血栓事件、出血和再手术" },
+        { name: "术后谵妄", presentation: "老年患者术后出现意识波动或注意力下降", differential: "疼痛、感染、低氧、药物反应和代谢紊乱", treatments: "非药物预防、诱因纠正和必要时药物干预", meds: "镇痛药、镇静药调整和抗精神病药慎用", guideline: "风险筛查、预防束和处理流程", risk: "住院延长、认知下降和死亡" },
+        { name: "围术期血糖管理", presentation: "糖尿病患者接受手术或围术期血糖波动", differential: "应激性高血糖、低血糖和糖尿病酮症风险", treatments: "术前药物调整、胰岛素方案和术后监测", meds: "胰岛素、二甲双胍、SGLT2 抑制剂和 GLP-1 受体激动剂", guideline: "目标血糖、禁食期用药和恢复进食后调整", risk: "感染、低血糖和酮症酸中毒" },
+        { name: "静脉血栓栓塞预防", presentation: "住院或术后患者存在血栓风险", differential: "低风险患者、出血高风险患者和既往 VTE 患者", treatments: "机械预防、药物预防和延长预防", meds: "低分子肝素、普通肝素、DOAC 和机械泵", guideline: "Caprini 评分、预防时长和禁忌证", risk: "深静脉血栓、肺栓塞和出血" },
+        { name: "术前心血管风险评估", presentation: "合并心血管病史患者准备接受非心脏手术", differential: "稳定病情、活动性心脏病和手术相关应激风险", treatments: "风险分层、功能容量评估和围术期药物优化", meds: "β受体阻滞剂、他汀、抗血小板药和降压药", guideline: "手术风险分级、进一步检查指征和药物延续", risk: "围术期心梗、心衰和死亡" },
+        { name: "术后感染预防", presentation: "手术患者存在切口感染或器械相关感染风险", differential: "浅表切口感染、深部感染和非感染性发热", treatments: "抗菌药预防、无菌操作和感染源控制", meds: "头孢菌素、替代抗菌药和局部处理用药", guideline: "预防用药时机、疗程和覆盖范围", risk: "切口感染、耐药和住院延长" }
+      ]
+    };
+
+    const patientProfiles = [
+      "老年患者",
+      "合并糖尿病的患者",
+      "合并慢性肾功能不全的患者",
+      "既往有心脑血管病史的患者",
+      "存在出血风险的患者",
+      "免疫功能低下的患者",
+      "肥胖或代谢异常患者",
+      "用药依从性不佳的患者",
+      "基层首诊患者",
+      "住院后症状仍未缓解的患者",
+      "初始治疗效果不佳的患者",
+      "伴有肝肾功能异常的患者",
+      "高龄且合并多种慢病的患者",
+      "需要长期随访管理的患者"
+    ];
+
+    const careContexts = [
+      "初始评估阶段",
+      "一线治疗选择阶段",
+      "治疗反应不佳阶段",
+      "复发或进展阶段",
+      "不良反应风险较高阶段",
+      "合并多种慢病用药场景",
+      "门诊随访管理阶段",
+      "住院治疗决策阶段",
+      "检查结果不典型场景",
+      "患者希望了解不同方案利弊的场景",
+      "指南推荐不一致或证据更新的场景",
+      "MDT 讨论场景",
+      "资源有限或基层转诊场景下",
+      "个体化风险分层阶段"
+    ];
+
+    const outcomeFocuses = [
+      "死亡率、住院率和生活质量",
+      "症状缓解、复发率和长期预后",
+      "疗效、安全性和患者依从性",
+      "并发症发生率和再入院风险",
+      "疾病进展、复发风险和随访频率",
+      "获益风险比、证据等级和适用人群",
+      "短期疗效、长期结局和不良事件",
+      "检查准确性、诊断效率和成本效益",
+      "药物相互作用、剂量调整和监测指标",
+      "指南推荐强度和关键研究证据",
+      "患者偏好、共病负担和可及性",
+      "治疗时机、疗程和停药标准"
+    ];
+
+    const decisionFactors = [
+      "年龄、共病和器官功能",
+      "病情严重程度、既往治疗史和用药风险",
+      "影像学、实验室指标和临床表现",
+      "指南推荐、证据等级和真实世界研究",
+      "患者偏好、费用和可及性",
+      "复发风险、并发症风险和随访条件",
+      "禁忌证、不良反应和相互作用",
+      "基层可操作性、转诊标准和监测频率",
+      "病程阶段、风险分层和治疗目标",
+      "个体化获益、潜在风险和替代方案"
+    ];
+
+    const evidenceAngles = [
+      "指南推荐与证据等级",
+      "关键临床研究结论",
+      "适用人群与禁忌证",
+      "获益风险平衡",
+      "用药监测和不良反应",
+      "基层可操作性和转诊节点",
+      "患者沟通要点",
+      "随访指标和复评时机",
+      "治疗升级或降阶策略",
+      "合并症下的个体化处理",
+      "诊断路径和检查选择",
+      "真实世界证据",
+      "费用、可及性和依从性",
+      "高风险人群识别",
+      "疗程、停药和复发预防",
+      "证据不确定时的决策要点"
+    ];
+
+    const questionTypes = ["诊断", "治疗", "用药", "指南", "预后"];
+
+    const questionTemplates = {
+      "诊断": [
+        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}出现${topic.presentation}，临床需要评估${topic.name}时，如何根据${factor}进行诊断与鉴别，并评估后续决策对${outcome}的影响？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}涉及${topic.name}，需要与${topic.differential}区分时，哪些检查路径更适合，并如何结合${factor}判断${outcome}？`,
+        ({ patient, topic, context, outcome, factor }) => `针对${patient}在${context}与${topic.name}相关的临床表现，哪些诊断工具或检查策略在${outcome}方面更有证据支持，且需要考虑${factor}？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，${topic.name}的诊断流程中如何结合${factor}判断是否需要进一步检查或专科转诊，并兼顾${outcome}？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，如果需要评估${topic.name}，有哪些指南推荐的初始评估步骤、排除诊断和基于${factor}的${outcome}判断？`
+      ],
+      "治疗": [
+        ({ patient, topic, context, outcome, factor }) => `对于${patient}的${topic.name}，在${context}，如何结合${factor}比较${topic.treatments}在${outcome}方面的获益和风险？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}需要处理${topic.name}时，哪些治疗策略在改善${outcome}方面有较强循证依据，并应如何纳入${factor}？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，${topic.name}治疗决策中如何根据${factor}选择初始方案、升级方案或转诊时机，以改善${outcome}？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}处理${topic.name}，指南推荐的治疗路径、关键研究证据和${factor}相关注意事项是什么，对${outcome}有何影响？`,
+        ({ patient, topic, context, outcome, factor }) => `围绕${patient}在${context}的${topic.name}，不同治疗方案对${outcome}的影响有哪些证据差异，如何结合${factor}取舍？`
+      ],
+      "用药": [
+        ({ patient, topic, context, outcome, factor }) => `对于${patient}在${context}管理${topic.name}，选择${topic.meds}时，如何结合${factor}做个体化用药决策并兼顾${outcome}？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}需要治疗${topic.name}时，哪些药物方案在${outcome}方面更有证据支持，且如何处理${factor}？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}处理${topic.name}时，${topic.meds}的剂量调整、监测指标和不良反应管理应如何安排，以优化${outcome}并结合${factor}？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}使用${topic.meds}治疗${topic.name}时，常见禁忌证、相互作用和停药标准有哪些，对${outcome}有何影响，且需要如何考虑${factor}？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，${topic.name}用药选择中如何基于${factor}比较一线药物和替代药物，并评估${outcome}？`
+      ],
+      "指南": [
+        ({ patient, topic, context, outcome, factor }) => `关于${patient}在${context}处理${topic.name}，最新指南对${topic.guideline}有哪些推荐，如何结合${factor}评估${outcome}？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，${topic.name}相关指南中哪些推荐与${outcome}关系最密切，证据等级如何，是否受${factor}影响？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}的${topic.name}处理中，指南如何建议在${context}结合${factor}进行风险分层和治疗选择，并改善${outcome}？`,
+        ({ patient, topic, context, outcome, factor }) => `不同指南对${patient}在${context}处理${topic.name}的${topic.guideline}是否存在差异，关键证据、${factor}和${outcome}如何比较？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，请整理${topic.name}的指南推荐、证据等级、${factor}相关临床注意事项，以及与${outcome}相关的依据。`
+      ],
+      "预后": [
+        ({ patient, topic, context, outcome, factor }) => `对于${patient}在${context}处理${topic.name}，哪些因素会影响${topic.risk}，并如何进一步评估${outcome}？目前有哪些风险评估工具或证据支持？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}处于${context}，${topic.name}患者如何根据${factor}评估${outcome}，并制定随访策略？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}涉及${topic.name}，哪些临床指标能结合${factor}预测预后、治疗反应和${outcome}？`,
+        ({ patient, topic, context, outcome, factor }) => `围绕${patient}在${context}的${topic.name}，哪些干预措施可能改善${outcome}，证据质量如何，是否需要依据${factor}分层？`,
+        ({ patient, topic, context, outcome, factor }) => `${patient}在${context}处理${topic.name}时，如何结合${factor}判断复发、并发症或进展风险，并预测${outcome}？`
+      ]
+    };
+
+    const departmentSelect = document.querySelector("#department");
+    const scenarioSelect = document.querySelector("#scenario");
+    const questionText = document.querySelector("#questionText");
+    const deptTag = document.querySelector("#deptTag");
+    const typeTag = document.querySelector("#typeTag");
+    const generateBtn = document.querySelector("#generateBtn");
+    const copyBtn = document.querySelector("#copyBtn");
+    const copyState = document.querySelector("#copyState");
+
+    const storageKey = "deepevidence-used-question-keys-v2";
+    const usedQuestionKeys = loadUsedQuestionKeys();
+
+    let currentQuestion;
+    let lastQuestionKey = "";
+    let copyTimer;
+
+    function renderQuestion(question) {
+      currentQuestion = question;
+      questionText.textContent = question.text;
+      deptTag.textContent = question.department;
+      typeTag.textContent = question.type;
+      copyState.classList.remove("show");
+    }
+
+    function randomIndex(length) {
+      if (window.crypto && window.crypto.getRandomValues) {
+        const values = new Uint32Array(1);
+        window.crypto.getRandomValues(values);
+        return values[0] % length;
+      }
+      return Math.floor(Math.random() * length);
+    }
+
+    function pick(list) {
+      const index = randomIndex(list.length);
+      return { value: list[index], index };
+    }
+
+    function loadUsedQuestionKeys() {
+      try {
+        return new Set(JSON.parse(localStorage.getItem(storageKey) || "[]"));
+      } catch (error) {
+        return new Set();
+      }
+    }
+
+    function saveUsedQuestionKeys() {
+      try {
+        const latestKeys = Array.from(usedQuestionKeys).slice(-6000);
+        localStorage.setItem(storageKey, JSON.stringify(latestKeys));
+      } catch (error) {
+        return;
+      }
+    }
+
+    function hashText(text) {
+      let hash = 2166136261;
+      for (let index = 0; index < text.length; index += 1) {
+        hash ^= text.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(36);
+    }
+
+    function buildQuestion() {
+      const departmentNames = Object.keys(departments);
+      const departmentPick = departmentSelect.value === "all"
+        ? pick(departmentNames)
+        : { value: departmentSelect.value, index: departmentNames.indexOf(departmentSelect.value) };
+      const department = departmentPick.value;
+      const topicPick = pick(departments[department]);
+      const typePick = scenarioSelect.value === "all"
+        ? pick(questionTypes)
+        : { value: scenarioSelect.value, index: questionTypes.indexOf(scenarioSelect.value) };
+      const type = typePick.value;
+      const templatePick = pick(questionTemplates[type]);
+      const patientPick = pick(patientProfiles);
+      const contextPick = pick(careContexts);
+      const outcomePick = pick(outcomeFocuses);
+      const factorPick = pick(decisionFactors);
+      const anglePick = pick(evidenceAngles);
+      const baseText = templatePick.value({
+        patient: patientPick.value,
+        topic: topicPick.value,
+        context: contextPick.value,
+        outcome: outcomePick.value,
+        factor: factorPick.value
+      });
+      const text = `${baseText} 请重点关注${anglePick.value}。`;
+
+      return { key: hashText(text), department, type, text };
+    }
+
+    function generateQuestion() {
+      let question = buildQuestion();
+      for (let attempts = 0; attempts < 120 && (usedQuestionKeys.has(question.key) || question.key === lastQuestionKey); attempts += 1) {
+        question = buildQuestion();
+      }
+      lastQuestionKey = question.key;
+      usedQuestionKeys.add(question.key);
+      saveUsedQuestionKeys();
+      renderQuestion(question);
+    }
+
+    async function copyQuestion() {
+      const text = currentQuestion.text;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        temp.setAttribute("readonly", "");
+        temp.style.position = "fixed";
+        temp.style.opacity = "0";
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+      }
+
+      window.clearTimeout(copyTimer);
+      copyState.classList.add("show");
+      copyTimer = window.setTimeout(() => copyState.classList.remove("show"), 2600);
+    }
+
+    generateBtn.addEventListener("click", generateQuestion);
+    copyBtn.addEventListener("click", copyQuestion);
+    departmentSelect.addEventListener("change", generateQuestion);
+    scenarioSelect.addEventListener("change", generateQuestion);
+
+    generateQuestion();
+  </script>
+</body>
+</html>
