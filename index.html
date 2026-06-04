@@ -15,7 +15,6 @@
       --muted: #66758f;
       --line: #d9e2f0;
       --soft: #f4f8fc;
-      --green: #15a36d;
       --white: #ffffff;
       --shadow: 0 18px 50px rgba(23, 66, 160, .16);
     }
@@ -224,27 +223,14 @@
       box-shadow: 0 10px 20px rgba(37, 99, 235, .23);
     }
 
-    .secondary {
-      color: var(--blue-800);
-      border: 1px solid rgba(37, 99, 235, .18);
-      background: #eef6ff;
-    }
-
-    .copy-state {
-      display: inline-flex;
-      align-items: center;
-      min-height: 46px;
-      color: var(--green);
-      font-size: 14px;
-      font-weight: 750;
-      opacity: 0;
-      transform: translateY(4px);
-      transition: opacity .2s ease, transform .2s ease;
-    }
-
-    .copy-state.show {
-      opacity: 1;
-      transform: translateY(0);
+    .manual-steps {
+      display: grid;
+      gap: 8px;
+      margin-top: 18px;
+      color: #4d5d77;
+      font-size: 15px;
+      font-weight: 650;
+      line-height: 1.6;
     }
 
     .qr-panel {
@@ -280,33 +266,6 @@
       display: block;
       width: 100%;
       border-radius: 6px;
-    }
-
-    .steps {
-      display: grid;
-      gap: 10px;
-      padding: 0 24px 24px;
-    }
-
-    .step {
-      display: grid;
-      grid-template-columns: 28px 1fr;
-      gap: 10px;
-      align-items: start;
-      color: #41516c;
-      font-size: 14px;
-      line-height: 1.55;
-    }
-
-    .step b {
-      display: grid;
-      width: 28px;
-      height: 28px;
-      place-items: center;
-      border-radius: 50%;
-      color: var(--white);
-      background: var(--blue-600);
-      font-size: 13px;
     }
 
     @media (max-width: 860px) {
@@ -356,7 +315,7 @@
           <span>AI 循证医学检索系统</span>
         </div>
       </div>
-      <div class="badge">临床问题一键生成 · 复制后扫码体验</div>
+      <div class="badge">临床问题启发 · 扫码进入体验</div>
     </header>
 
     <section class="layout">
@@ -401,23 +360,22 @@
 
         <div class="actions">
           <button class="primary" id="generateBtn" type="button" aria-label="生成新的临床问题">换一个问题</button>
-          <button class="secondary" id="copyBtn" type="button" aria-label="复制当前临床问题">复制问题</button>
-          <span class="copy-state" id="copyState">已复制，可以扫码体验了</span>
+        </div>
+
+        <div class="manual-steps" aria-label="体验步骤">
+          <div>1.第一步：浏览问题，寻找启发</div>
+          <div>2.第二步：结合临床，提出你自己的问题</div>
+          <div>3.第三步：扫码进入，手动输入你的问题</div>
         </div>
       </div>
 
       <aside class="qr-panel" aria-label="扫码进入 DeepEvidence">
         <div class="qr-head">
-          <h2>复制问题后，扫码进入产品</h2>
-          <p>进入 DeepEvidence 后，将刚才复制的临床问题粘贴到提问框，即可开始体验。</p>
+          <h2>扫码进入产品，提问</h2>
+          <p>进入 DeepEvidence 后，手动输入你的问题，即可开始体验。</p>
         </div>
         <div class="qr-frame">
           <img src="assets/deepevidence-qr-crop.jpg" alt="DeepEvidence 体验二维码">
-        </div>
-        <div class="steps">
-          <div class="step"><b>1</b><span>点击“换一个问题”，找到适合自己的临床场景。</span></div>
-          <div class="step"><b>2</b><span>点击“复制问题”，把完整问题复制到剪贴板。</span></div>
-          <div class="step"><b>3</b><span>扫描二维码进入 DeepEvidence，粘贴问题并提交。</span></div>
         </div>
       </aside>
     </section>
@@ -581,8 +539,6 @@
     const deptTag = document.querySelector("#deptTag");
     const typeTag = document.querySelector("#typeTag");
     const generateBtn = document.querySelector("#generateBtn");
-    const copyBtn = document.querySelector("#copyBtn");
-    const copyState = document.querySelector("#copyState");
 
     const maxQuestionLength = 40;
     const storageKey = "deepevidence-used-question-keys-v3";
@@ -590,14 +546,12 @@
 
     let currentQuestion;
     let lastQuestionKey = "";
-    let copyTimer;
 
     function renderQuestion(question) {
       currentQuestion = question;
       questionText.textContent = question.text;
       deptTag.textContent = question.department;
       typeTag.textContent = question.type;
-      copyState.classList.remove("show");
     }
 
     function randomIndex(length) {
@@ -680,29 +634,7 @@
       renderQuestion(question);
     }
 
-    async function copyQuestion() {
-      const text = currentQuestion.text;
-      try {
-        await navigator.clipboard.writeText(text);
-      } catch (error) {
-        const temp = document.createElement("textarea");
-        temp.value = text;
-        temp.setAttribute("readonly", "");
-        temp.style.position = "fixed";
-        temp.style.opacity = "0";
-        document.body.appendChild(temp);
-        temp.select();
-        document.execCommand("copy");
-        document.body.removeChild(temp);
-      }
-
-      window.clearTimeout(copyTimer);
-      copyState.classList.add("show");
-      copyTimer = window.setTimeout(() => copyState.classList.remove("show"), 2600);
-    }
-
     generateBtn.addEventListener("click", generateQuestion);
-    copyBtn.addEventListener("click", copyQuestion);
     departmentSelect.addEventListener("change", generateQuestion);
     scenarioSelect.addEventListener("change", generateQuestion);
 
